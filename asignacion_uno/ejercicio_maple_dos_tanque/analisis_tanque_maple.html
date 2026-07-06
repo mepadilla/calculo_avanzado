@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Script Maple: Recipiente a Presión</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+    <!-- Chosen Palette: Slate (Background/Text), Blue (Primary/Charts), Emerald (Success/Money), Amber (Warning/Error) -->
+    
+    <!-- Application Structure Plan: La aplicación está diseñada como un artículo interactivo de desplazamiento vertical (scrollytelling) que desglosa el script de Maple "tanque_uno.mw" paso a paso. Se divide en cuatro secciones lógicas: 1. Parámetros del Problema (contexto), 2. Cálculo de Masa (resultados del volumen en Maple), 3. Modelo de Costos y Diferenciales (simulador interactivo de derivadas parciales), y 4. Visualización 3D (recreación del plot3d de Maple). Esta estructura lineal y guiada facilita la comprensión del puente entre el código algebraico y la realidad física del diseño de ingeniería, permitiendo al usuario interactuar con los mismos modelos matemáticos que ejecuta Maple en segundo plano. -->
+    
+    <!-- Visualization & Content Choices: 
+    1. Gráfico de Peso -> Goal: Inform/Organize -> Viz: Chart.js Doughnut -> Justification: Muestra la distribución porcentual de la masa, destacando cómo el cálculo de volúmenes de Maple impacta el peso final.
+    2. Simulador de Error Diferencial -> Goal: Explore Relationships/Change -> Viz: Sliders HTML nativos conectados a variables JS -> Justification: Traduce el uso de derivadas parciales (`diff(Costo, Diam)`) de Maple en una experiencia táctil donde el usuario ve el impacto financiero en tiempo real.
+    3. Recreación 3D del Tanque -> Goal: Inform/Wow Factor -> Viz: Plotly.js 3D Surface -> Justification: Emula visualmente el comando `plot3d` del script original de Maple, combinando cilindro, cono y elipsoide para verificar la geometría.
+    Confirming NO SVG/Mermaid. -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            max-height: 400px;
+            min-height: 300px;
+        }
+        
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 35vh;
+                max-height: 350px;
+                min-height: 250px;
+            }
+        }
+
+        .code-block {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-200 selection:text-blue-900">
+
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl font-black text-blue-600">&#8747;</span>
+                    <span class="font-bold text-xl tracking-tight text-slate-900">Maple<span class="text-slate-400 font-light">Explainer</span></span>
+                </div>
+                <div class="text-sm font-medium text-slate-500 uppercase tracking-widest hidden sm:block">
+                    tanque_uno.mw
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <header class="text-center max-w-3xl mx-auto space-y-4">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Análisis del Script de Recipientes a Presión</h1>
+            <p class="text-lg text-slate-600 leading-relaxed">
+                Esta página web explica e ilustra de forma interactiva la lógica matemática codificada en el archivo Maple <span class="font-mono bg-slate-200 px-1 rounded text-sm text-slate-700">tanque_uno.mw</span>. Exploraremos cómo el software calcula la masa rigurosamente mediante volúmenes y propaga la incertidumbre del costo de fabricación usando cálculo diferencial.
+            </p>
+        </header>
+
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 sm:p-8">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2 border-b border-slate-100 pb-4">1. Inicialización y Geometría del Tanque</h2>
+                <p class="text-slate-600 mb-6 leading-relaxed">
+                    El primer paso crítico en el script de Maple es definir las variables iniciales asegurando la consistencia dimensional. El recipiente consta de tres secciones: una tapa elipsoidal 2:1, un cilindro central y un cono inferior. Un error común que el script evita es mezclar pulgadas con pies; Maple se programa para dividir explícitamente los espesores entre 12.
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                            <span class="block text-xs uppercase tracking-widest text-slate-500 font-semibold mb-1">Altura Carcasa (H)</span>
+                            <span class="text-2xl font-bold text-slate-800">10 ft</span>
+                        </div>
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                            <span class="block text-xs uppercase tracking-widest text-slate-500 font-semibold mb-1">Altura Cono (h)</span>
+                            <span class="text-2xl font-bold text-slate-800">10 ft</span>
+                        </div>
+                        <div class="bg-blue-50 rounded-xl p-4 border border-blue-100 col-span-2">
+                            <span class="block text-xs uppercase tracking-widest text-blue-500 font-semibold mb-1">Diámetro (D = 2/3 H)</span>
+                            <span class="text-2xl font-bold text-blue-700">6.667 ft</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Código Maple Equivalente</h3>
+                        <div class="code-block mt-0">
+> restart;
+> rho := 490:
+> e_c := 0.1046 / 12:  # Pulg a Pies
+> e_f := 0.1345 / 12:  # Pulg a Pies
+> H_nom := 10:
+> h_nom := 10:
+> Diam_nom := (2/3) * H_nom:
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 sm:p-8">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2 border-b border-slate-100 pb-4">2. Corrección Volumétrica y Cálculo de Masa</h2>
+                <p class="text-slate-600 mb-6 leading-relaxed">
+                    El script de Maple mejora las estimaciones básicas al calcular <strong>volúmenes explícitos de material</strong> en lugar de multiplicar directamente el área por la densidad. Calcula el área superficial de cada componente y la multiplica por su espesor específico para obtener el volumen de la lámina de acero, asegurando la precisión física antes de aplicar la densidad (<span class="font-mono text-sm">&rho; = 490 lbm/ft³</span>).
+                </p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <div class="chart-container">
+                            <canvas id="weightChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                            <h3 class="font-bold text-slate-800 mb-1">Masa Total Estimada (Maple Evalf)</h3>
+                            <p class="text-4xl font-extrabold text-blue-600">1,706.6 <span class="text-xl text-blue-400 font-medium">lbm</span></p>
+                        </div>
+                        <div class="code-block">
+> Vol_cab := Area_cab * e_c:
+> Vol_cil := Area_cil * e_c:
+> Vol_con := Area_con * e_f:
+> Peso_Total := (Vol_cab + Vol_cil + Vol_con) * rho:
+> evalf(eval(Peso_Total, ...));
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 sm:p-8">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2 border-b border-slate-100 pb-4">3. Diferenciales y Propagación de Errores de Costo</h2>
+                <p class="text-slate-600 mb-6 leading-relaxed">
+                    Esta es la sección más potente del script matemático. Maple utiliza su motor de cálculo simbólico (`diff()`) para extraer las derivadas parciales de la función de <em>Costo Total</em> respecto al Diámetro, la Altura del Cilindro y la Altura del Cono. Al multiplicar estas derivadas por las tolerancias de fabricación, estimamos la desviación financiera máxima. <strong>Interactúe con los controles a continuación para ver cómo la matemática del script responde en tiempo real a diferentes escenarios de error.</strong>
+                </p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-7 space-y-6 bg-slate-50 p-6 rounded-xl border border-slate-100">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="text-sm font-semibold text-slate-700">Tolerancia en Diámetro (&Delta;D)</label>
+                                <span id="val-err-d" class="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">2.0%</span>
+                            </div>
+                            <input type="range" id="slider-err-d" min="0" max="5" step="0.1" value="2.0" class="w-full h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="text-sm font-semibold text-slate-700">Tolerancia Altura Carcasa (&Delta;H)</label>
+                                <span id="val-err-h" class="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">1.5%</span>
+                            </div>
+                            <input type="range" id="slider-err-h" min="0" max="5" step="0.1" value="1.5" class="w-full h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="text-sm font-semibold text-slate-700">Tolerancia Altura Cono (&Delta;h)</label>
+                                <span id="val-err-h2" class="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">1.5%</span>
+                            </div>
+                            <input type="range" id="slider-err-h2" min="0" max="5" step="0.1" value="1.5" class="w-full h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                        </div>
+
+                        <div class="code-block text-xs mt-4 mb-0">
+> dC_dDiam := diff(Costo_Total, Diam):
+> Error_Abs := abs(dC_dDiam)*Delta_Diam + ...
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-5 flex flex-col justify-center space-y-4">
+                        <div class="bg-white border border-slate-200 rounded-xl p-5 text-center shadow-sm">
+                            <span class="block text-xs uppercase tracking-widest text-slate-500 font-semibold mb-1">Costo Base Calculado</span>
+                            <span class="text-3xl font-bold text-slate-800">$337.22</span>
+                        </div>
+                        
+                        <div class="bg-emerald-900 border border-emerald-800 rounded-xl p-6 text-center shadow-md relative overflow-hidden">
+                            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">&#8706;</div>
+                            <span class="block text-xs uppercase tracking-widest text-emerald-300 font-semibold mb-2 relative z-10">Error Relativo Propagado</span>
+                            <span id="res-rel-err" class="text-5xl font-black text-white relative z-10">3.01%</span>
+                            <div class="mt-4 pt-4 border-t border-emerald-800/50 flex justify-between items-center relative z-10">
+                                <span class="text-emerald-400 text-sm">Impacto Económico:</span>
+                                <span id="res-abs-err" class="text-emerald-200 font-mono font-bold text-lg">± $10.16</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 sm:p-8">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2 border-b border-slate-100 pb-4">4. Visualización Geométrica Espacial</h2>
+                <p class="text-slate-600 mb-6 leading-relaxed">
+                    El script finaliza combinando las parametrizaciones de las tres formas matemáticas (cilindro, cono y elipsoide) usando el comando `plot3d` de Maple. Esta representación interactiva desarrollada con Plotly recrea fielmente ese entorno 3D, permitiendo rotar e inspeccionar el ensamblaje diseñado para verificar que las condiciones de frontera coincidan visualmente (por ejemplo, asegurando que los bordes radiados estén perfectamente alineados en Z=0 y Z=10).
+                </p>
+
+                <div class="bg-slate-900 rounded-xl p-2 relative">
+                    <div class="absolute top-4 left-4 z-10 bg-slate-800/80 backdrop-blur text-white text-xs px-3 py-2 rounded-lg border border-slate-700">
+                        <p class="font-bold mb-1">Controles WebGL</p>
+                        <ul class="list-none space-y-1 text-slate-300">
+                            <li>&#128433;&#65039; Click & Arrastrar para rotar</li>
+                            <li>&#128434;&#65039; Scroll para zoom</li>
+                        </ul>
+                    </div>
+                    <div id="plotly-tank" class="chart-container" style="height: 60vh; max-height: 600px;"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-8 mt-12 text-center">
+        <p class="text-slate-500 text-sm">Desarrollado para la interpretación interactiva del portafolio analítico.</p>
+    </footer>
+
+    <script>
+        // Data logic translated from Maple Script for JS interactivity
+        const H_nom = 10;
+        const h_nom = 10;
+        const Diam_nom = (2/3) * H_nom;
+        const rho = 490;
+        
+        // Conversions applied in Maple
+        const e_c = 0.1046 / 12;
+        const e_f = 0.1345 / 12;
+
+        // Area computations
+        const Area_cab = 1.084 * Math.pow(Diam_nom, 2);
+        const Area_cil = Math.PI * Diam_nom * H_nom;
+        const L_con = Math.sqrt(Math.pow(Diam_nom/2, 2) + Math.pow(h_nom, 2));
+        const Area_con = Math.PI * (Diam_nom/2) * L_con;
+
+        // Volume computations
+        const Vol_cab = Area_cab * e_c;
+        const Vol_cil = Area_cil * e_c;
+        const Vol_con = Area_con * e_f;
+
+        // Weight computations
+        const Peso_cab = Vol_cab * rho;
+        const Peso_cil = Vol_cil * rho;
+        const Peso_con = Vol_con * rho;
+        const Peso_Total = Peso_cab + Peso_cil + Peso_con;
+
+        // 1. Chart.js Weight Doughnut
+        const ctxWeight = document.getElementById('weightChart').getContext('2d');
+        new Chart(ctxWeight, {
+            type: 'doughnut',
+            data: {
+                labels: ['Cabeza Elipsoidal', 'Carcasa Cilíndrica', 'Fondo Cónico'],
+                datasets: [{
+                    data: [Peso_cab, Peso_cil, Peso_con],
+                    backgroundColor: ['#60a5fa', '#3b82f6', '#1d4ed8'],
+                    hoverOffset: 4,
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 20, font: { family: "'Inter', sans-serif" } } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const val = context.parsed.toFixed(1);
+                                const percentage = ((context.parsed / Peso_Total) * 100).toFixed(1);
+                                return ` ${context.label}: ${val} lbm (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. Cost Model & Error Propagation Simulator
+        function calculateBaseCost(D, H, h) {
+            const Acab = 1.084 * D * D;
+            const Acil = Math.PI * D * H;
+            const L_val = Math.sqrt((D/2)*(D/2) + h*h);
+            const Acon = Math.PI * (D/2) * L_val;
+            
+            const Ccab = 50 + Acab * 0.70;
+            const Ccil = Acil * 0.70;
+            const Ccon = Acon * 0.90;
+            const Csold = 0.18 * (2 * Math.PI * D);
+            
+            return Ccab + Ccil + Ccon + Csold;
+        }
+
+        const Costo_Nominal = calculateBaseCost(Diam_nom, H_nom, h_nom);
+
+        // Numerical derivatives approximation (mimicking Maple's diff)
+        const delta = 0.0001;
+        const dC_dD = (calculateBaseCost(Diam_nom + delta, H_nom, h_nom) - calculateBaseCost(Diam_nom - delta, H_nom, h_nom)) / (2 * delta);
+        const dC_dH = (calculateBaseCost(Diam_nom, H_nom + delta, h_nom) - calculateBaseCost(Diam_nom, H_nom - delta, h_nom)) / (2 * delta);
+        const dC_dh = (calculateBaseCost(Diam_nom, H_nom, h_nom + delta) - calculateBaseCost(Diam_nom, H_nom, h_nom - delta)) / (2 * delta);
+
+        const sliderD = document.getElementById('slider-err-d');
+        const sliderH = document.getElementById('slider-err-h');
+        const sliderh2 = document.getElementById('slider-err-h2');
+        const displayD = document.getElementById('val-err-d');
+        const displayH = document.getElementById('val-err-h');
+        const displayh2 = document.getElementById('val-err-h2');
+        const resAbs = document.getElementById('res-abs-err');
+        const resRel = document.getElementById('res-rel-err');
+
+        function updateErrorModel() {
+            const percD = parseFloat(sliderD.value) / 100;
+            const percH = parseFloat(sliderH.value) / 100;
+            const perch2 = parseFloat(sliderh2.value) / 100;
+
+            displayD.textContent = sliderD.value + '%';
+            displayH.textContent = sliderH.value + '%';
+            displayh2.textContent = sliderh2.value + '%';
+
+            const errorAbs = Math.abs(dC_dD) * (Diam_nom * percD) + 
+                             Math.abs(dC_dH) * (H_nom * percH) + 
+                             Math.abs(dC_dh) * (h_nom * perch2);
+                             
+            const errorRel = (errorAbs / Costo_Nominal) * 100;
+
+            resAbs.textContent = '± $' + errorAbs.toFixed(2);
+            resRel.textContent = errorRel.toFixed(2) + '%';
+        }
+
+        sliderD.addEventListener('input', updateErrorModel);
+        sliderH.addEventListener('input', updateErrorModel);
+        sliderh2.addEventListener('input', updateErrorModel);
+        updateErrorModel(); // Initialize
+
+        // 3. Plotly 3D Visualization (Recreating Maple's plot3d)
+        function render3DTank() {
+            const R = Diam_nom / 2;
+            const steps = 40;
+            
+            // Arrays for Cylinder
+            let cil_x = [], cil_y = [], cil_z = [];
+            for (let v = 0; v <= H_nom; v += H_nom/10) {
+                let x_row = [], y_row = [], z_row = [];
+                for (let u = 0; u <= 2 * Math.PI + 0.1; u += (2*Math.PI)/steps) {
+                    x_row.push(R * Math.cos(u));
+                    y_row.push(R * Math.sin(u));
+                    z_row.push(v);
+                }
+                cil_x.push(x_row); cil_y.push(y_row); cil_z.push(z_row);
+            }
+
+            // Arrays for Cone
+            let con_x = [], con_y = [], con_z = [];
+            for (let v = -h_nom; v <= 0; v += h_nom/10) {
+                let x_row = [], y_row = [], z_row = [];
+                let current_r = (R / h_nom) * (v + h_nom);
+                for (let u = 0; u <= 2 * Math.PI + 0.1; u += (2*Math.PI)/steps) {
+                    x_row.push(current_r * Math.cos(u));
+                    y_row.push(current_r * Math.sin(u));
+                    z_row.push(v);
+                }
+                con_x.push(x_row); con_y.push(y_row); con_z.push(z_row);
+            }
+
+            // Arrays for Ellipsoidal Head
+            let cab_x = [], cab_y = [], cab_z = [];
+            for (let w = 0; w <= Math.PI / 2 + 0.05; w += (Math.PI/2)/10) {
+                let x_row = [], y_row = [], z_row = [];
+                for (let u = 0; u <= 2 * Math.PI + 0.1; u += (2*Math.PI)/steps) {
+                    x_row.push(R * Math.cos(u) * Math.sin(w));
+                    y_row.push(R * Math.sin(u) * Math.sin(w));
+                    z_row.push(H_nom + (R / 2) * Math.cos(w));
+                }
+                cab_x.push(x_row); cab_y.push(y_row); cab_z.push(z_row);
+            }
+
+            const surfaceColorscale = [[0, '#cbd5e1'], [1, '#94a3b8']]; // Slate tones
+            const headColorscale = [[0, '#93c5fd'], [1, '#60a5fa']];    // Blue tones
+            const coneColorscale = [[0, '#3b82f6'], [1, '#1d4ed8']];    // Darker blue
+
+            const data = [
+                { x: cil_x, y: cil_y, z: cil_z, type: 'surface', colorscale: surfaceColorscale, showscale: false, name: 'Cilindro', hoverinfo: 'none' },
+                { x: con_x, y: con_y, z: con_z, type: 'surface', colorscale: coneColorscale, showscale: false, name: 'Cono', hoverinfo: 'none' },
+                { x: cab_x, y: cab_y, z: cab_z, type: 'surface', colorscale: headColorscale, showscale: false, name: 'Cabeza', hoverinfo: 'none' }
+            ];
+
+            const layout = {
+                margin: { l: 0, r: 0, b: 0, t: 0 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                scene: {
+                    aspectmode: 'data',
+                    camera: { eye: { x: 1.8, y: 1.8, z: 1.2 } },
+                    xaxis: { title: 'Eje X', showgrid: false, zeroline: false, showbackground: false, tickfont: {color: '#64748b'} },
+                    yaxis: { title: 'Eje Y', showgrid: false, zeroline: false, showbackground: false, tickfont: {color: '#64748b'} },
+                    zaxis: { title: 'Eje Z', showgrid: true, gridcolor: '#334155', zeroline: false, showbackground: false, tickfont: {color: '#64748b'} }
+                }
+            };
+
+            Plotly.newPlot('plotly-tank', data, layout, { responsive: true, displayModeBar: false });
+        }
+
+        // Delay Plotly render slightly to ensure container is fully sized
+        setTimeout(render3DTank, 100);
+    </script>
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Interactivo: Continuidad Multivariable</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <!-- Chosen Palette: Slate and Indigo -->
+    <!-- Application Structure Plan: La aplicación utiliza un diseño de panel lateral (dashboard) para dividir el problema matemático en tres secciones lógicas: 1. Definición Formal (contexto), 2. Análisis Analítico Interactivo (cálculo de límites por trayectorias), y 3. Visualización 3D. Esta arquitectura permite al usuario digerir la complejidad del cálculo multivariable paso a paso, facilitando la comprensión de cómo las aproximaciones afectan el límite. -->
+    <!-- Visualization & Content Choices: Función a trozos -> Goal: Inform -> Tipografía estructurada en HTML -> Justification: Presenta la base del problema claramente sin SVG. Evaluación de trayectorias -> Goal: Change/Compare -> Sliders y actualización dinámica de DOM con Vanilla JS -> Justification: Permite al usuario "probar" empíricamente que el límite se mantiene en cero independientemente de la pendiente. Superficie 3D -> Goal: Relationships -> Plotly.js (WebGL Surface) -> Justification: Demuestra visualmente la continuidad sin agujeros ni asíntotas en el origen. Confirming NO SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .math-text { font-family: 'Times New Roman', serif; font-style: italic; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 60vh; max-height: 600px; }
+        @media (max-width: 768px) { .chart-container { height: 40vh; max-height: 400px; } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen flex overflow-hidden">
+
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col hidden md:flex">
+        <div class="p-6 border-b border-slate-100">
+            <h1 class="text-xl font-bold text-slate-900 tracking-tight">Análisis Matemático</h1>
+            <p class="text-xs text-slate-500 mt-1 uppercase tracking-wider font-semibold">Continuidad en (0,0)</p>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <button data-target="tab-intro" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 bg-indigo-50 text-indigo-700 font-semibold rounded-lg transition-colors text-left">
+                <span>&#128214;</span>
+                <span class="text-sm">El Problema</span>
+            </button>
+            <button data-target="tab-limites" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors text-left">
+                <span>&#128208;</span>
+                <span class="text-sm">Análisis de Límites</span>
+            </button>
+            <button data-target="tab-3d" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors text-left">
+                <span>&#127922;</span>
+                <span class="text-sm">Visualización 3D</span>
+            </button>
+        </nav>
+        <div class="p-4 border-t border-slate-100 text-xs text-slate-400 text-center">
+            Reporte Interactivo v1.0
+        </div>
+    </aside>
+
+    <div class="md:hidden bg-white border-b border-slate-200 p-4 flex justify-between items-center w-full absolute top-0 z-10">
+        <h1 class="font-bold text-slate-900">Análisis Continuidad</h1>
+        <select id="mobile-nav" class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2">
+            <option value="tab-intro">El Problema</option>
+            <option value="tab-limites">Análisis de Límites</option>
+            <option value="tab-3d">Visualización 3D</option>
+        </select>
+    </div>
+
+    <main class="flex-1 h-full overflow-y-auto p-6 md:p-10 pt-20 md:pt-10">
+        
+        <div id="tab-intro" class="tab-pane max-w-4xl mx-auto animation-fade-in">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Planteamiento del Problema</h2>
+                <p class="text-slate-600 leading-relaxed text-lg">
+                    El objetivo de este reporte es estudiar de manera interactiva la continuidad de una función multivariable específica en el origen del plano cartesiano <span class="math-text">(0,0)</span>. Exploraremos las tres condiciones matemáticas necesarias para demostrar rigurosamente su comportamiento continuo.
+                </p>
+            </header>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-8">
+                <h3 class="text-lg font-semibold text-slate-800 mb-6 uppercase tracking-wider text-sm">Definición de la Función</h3>
+                
+                <div class="bg-slate-50 rounded-xl p-6 mb-6 flex justify-center items-center overflow-x-auto">
+                    <div class="text-xl md:text-2xl font-medium text-slate-800 whitespace-nowrap">
+                        <span class="math-text">f(x,y)</span> = 
+                        <span class="inline-flex items-center align-middle ml-2">
+                            <span class="text-4xl font-light mr-2">{</span>
+                            <div class="flex flex-col space-y-4">
+                                <div>
+                                    <span class="math-text">x<sup>2</sup> + y<sup>2</sup> - 2x<sup>2</sup>y - </span>
+                                    <span class="inline-flex flex-col items-center align-middle mx-1">
+                                        <span class="border-b border-slate-800 pb-1 px-2 math-text">4x<sup>6</sup>y<sup>2</sup></span>
+                                        <span class="pt-1 px-2 math-text">(x<sup>4</sup> + y<sup>2</sup>)<sup>2</sup></span>
+                                    </span>
+                                    <span class="ml-4 text-slate-500 text-base">si (x,y) &ne; (0,0)</span>
+                                </div>
+                                <div>
+                                    <span class="math-text ml-8">0</span>
+                                    <span class="ml-4 text-slate-500 text-base">si (x,y) = (0,0)</span>
+                                </div>
+                            </div>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="p-5 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                        <div class="w-8 h-8 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center font-bold mb-3">1</div>
+                        <h4 class="font-semibold text-slate-800 mb-2">Evaluación</h4>
+                        <p class="text-sm text-slate-600">La función debe estar definida en el punto. Observando la definición, <span class="math-text">f(0,0) = 0</span>.</p>
+                    </div>
+                    <div class="p-5 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                        <div class="w-8 h-8 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center font-bold mb-3">2</div>
+                        <h4 class="font-semibold text-slate-800 mb-2">Límite Global</h4>
+                        <p class="text-sm text-slate-600">El límite cuando <span class="math-text">(x,y) &rarr; (0,0)</span> debe existir e independizar de la trayectoria.</p>
+                    </div>
+                    <div class="p-5 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                        <div class="w-8 h-8 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center font-bold mb-3">3</div>
+                        <h4 class="font-semibold text-slate-800 mb-2">Igualdad</h4>
+                        <p class="text-sm text-slate-600">El valor del límite calculado debe coincidir exactamente con la evaluación inicial <span class="math-text">L = f(0,0)</span>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-limites" class="tab-pane max-w-4xl mx-auto hidden animation-fade-in">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Evaluación de Trayectorias</h2>
+                <p class="text-slate-600 leading-relaxed text-lg">
+                    Para asegurar que el límite es cero, debemos demostrar que acercarnos al origen por cualquier camino produce el mismo resultado. Utiliza los controles interactivos para evaluar aproximaciones lineales y parabólicas.
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-bold text-slate-800">Trayectoria Lineal</h3>
+                        <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-sm math-text font-semibold">y = mx</span>
+                    </div>
+                    <p class="text-sm text-slate-600 mb-6">Aproximación por rectas. Ajusta la pendiente <span class="math-text">m</span> para observar el resultado del límite iterado.</p>
+                    
+                    <div class="mb-8">
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Pendiente <span class="math-text">m</span>: <span id="m-display" class="font-bold text-indigo-600">1</span></label>
+                        <input type="range" id="m-slider" min="-10" max="10" value="1" step="0.5" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <div class="flex justify-between text-xs text-slate-400 mt-2">
+                            <span>-10</span>
+                            <span>0</span>
+                            <span>10</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800 rounded-xl p-5 text-slate-200 font-mono text-sm shadow-inner">
+                        <div class="mb-2 text-slate-400">// Cálculo del límite sustituyendo y = mx</div>
+                        <div class="mb-1 text-green-400">> limite_rectas := limit(eval(f(x,y), y=<span id="m-code-display">1</span>*x), x=0);</div>
+                        <div class="flex items-center space-x-2 mt-4 text-lg">
+                            <span>Resultado = </span>
+                            <span class="font-bold text-white bg-indigo-600/30 px-3 py-1 rounded">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-bold text-slate-800">Trayectoria Crítica</h3>
+                        <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm math-text font-semibold">y = x<sup>2</sup></span>
+                    </div>
+                    <p class="text-sm text-slate-600 mb-6">El denominador <span class="math-text">(x<sup>4</sup> + y<sup>2</sup>)<sup>2</sup></span> sugiere que acercarnos mediante una parábola podría generar una indeterminación mayor o diferente límite.</p>
+
+                    <button id="btn-eval-parabola" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-3 px-4 rounded-xl transition-colors shadow-sm mb-6 flex items-center justify-center space-x-2">
+                        <span>&#9654;</span>
+                        <span>Evaluar Límite Parabólico</span>
+                    </button>
+
+                    <div id="parabola-result" class="bg-slate-800 rounded-xl p-5 text-slate-200 font-mono text-sm shadow-inner opacity-50 pointer-events-none transition-opacity duration-300">
+                        <div class="mb-2 text-slate-400">// Cálculo evaluando por trayectoria y = x^2</div>
+                        <div class="mb-1 text-green-400">> limite_parabola := limit(eval(f(x,y), y=x^2), x=0);</div>
+                        <div class="flex items-center space-x-2 mt-4 text-lg">
+                            <span>Resultado = </span>
+                            <span class="font-bold text-white bg-indigo-600/30 px-3 py-1 rounded">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-indigo-50 border border-indigo-100 rounded-2xl p-6 flex items-start space-x-4">
+                <div class="text-indigo-600 text-2xl mt-1">&#128161;</div>
+                <div>
+                    <h4 class="font-bold text-indigo-900 mb-1">Teorema de Compresión (Sandwich)</h4>
+                    <p class="text-indigo-800 text-sm leading-relaxed">
+                        Dado que <span class="math-text">x<sup>4</sup> &le; x<sup>4</sup> + y<sup>2</sup></span> y <span class="math-text">y<sup>2</sup> &le; x<sup>4</sup> + y<sup>2</sup></span>, las fracciones parciales de la ecuación siempre están acotadas por 1. El término cuadrático dominante empuja inexorablemente el límite global a 0, confirmando analíticamente la continuidad formal, cumpliendo la <strong>Condición 3</strong>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-3d" class="tab-pane max-w-6xl mx-auto hidden animation-fade-in flex flex-col h-full pb-10">
+            <header class="mb-6 flex-shrink-0">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Superficie Funcional en R<sup>3</sup></h2>
+                <p class="text-slate-600 text-lg">
+                    Exploración tridimensional del comportamiento de la función en la vecindad del origen. 
+                </p>
+            </header>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-2 md:p-6 flex-1 flex flex-col items-center justify-center relative w-full">
+                <div class="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur px-4 py-2 rounded-lg border border-slate-200 shadow-sm pointer-events-none">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Instrucciones</p>
+                    <p class="text-sm text-slate-800">&#128433;&#65039; Arrastrar para rotar</p>
+                    <p class="text-sm text-slate-800 mt-1">&#128270; Scroll para Zoom</p>
+                </div>
+                
+                <div id="plotly-container" class="chart-container"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const tabs = document.querySelectorAll('.tab-btn');
+        const panes = document.querySelectorAll('.tab-pane');
+        const mobileNav = document.getElementById('mobile-nav');
+
+        function switchTab(targetId) {
+            tabs.forEach(t => {
+                t.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold');
+                t.classList.add('text-slate-600', 'hover:bg-slate-50');
+            });
+            
+            const activeTab = Array.from(tabs).find(t => t.dataset.target === targetId);
+            if(activeTab) {
+                activeTab.classList.remove('text-slate-600', 'hover:bg-slate-50');
+                activeTab.classList.add('bg-indigo-50', 'text-indigo-700', 'font-semibold');
+            }
+
+            if(mobileNav.value !== targetId) {
+                mobileNav.value = targetId;
+            }
+
+            panes.forEach(p => p.classList.add('hidden'));
+            document.getElementById(targetId).classList.remove('hidden');
+
+            if (targetId === 'tab-3d' && !window.plotRendered) {
+                render3DPlot();
+                window.plotRendered = true;
+            }
+        }
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => switchTab(tab.dataset.target));
+        });
+
+        mobileNav.addEventListener('change', (e) => {
+            switchTab(e.target.value);
+        });
+
+        const mSlider = document.getElementById('m-slider');
+        const mDisplay = document.getElementById('m-display');
+        const mCodeDisplay = document.getElementById('m-code-display');
+
+        mSlider.addEventListener('input', (e) => {
+            const val = e.target.value;
+            mDisplay.textContent = val;
+            mCodeDisplay.textContent = val;
+        });
+
+        const btnEval = document.getElementById('btn-eval-parabola');
+        const parResult = document.getElementById('parabola-result');
+
+        btnEval.addEventListener('click', () => {
+            btnEval.innerHTML = '<span>&#10004;</span><span>Evaluación Completada</span>';
+            btnEval.classList.remove('bg-slate-900', 'hover:bg-slate-800');
+            btnEval.classList.add('bg-green-600', 'hover:bg-green-700');
+            parResult.classList.remove('opacity-50', 'pointer-events-none');
+        });
+
+        function render3DPlot() {
+            let z_data = [];
+            let x_data = [];
+            let y_data = [];
+            const step = 0.05;
+            
+            for(let i = -1.5; i <= 1.5; i+=step) { 
+                x_data.push(i); 
+                y_data.push(i); 
+            }
+            
+            for(let j=0; j<y_data.length; j++) {
+                let row = [];
+                for(let i=0; i<x_data.length; i++) {
+                    let x = x_data[i]; 
+                    let y = y_data[j];
+                    
+                    if(Math.abs(x) < 0.001 && Math.abs(y) < 0.001) {
+                        row.push(0);
+                    } else {
+                        let num = 4 * Math.pow(x,6) * Math.pow(y,2);
+                        let den = Math.pow(Math.pow(x,4) + Math.pow(y,2), 2);
+                        let val = (x*x) + (y*y) - (2*x*x*y) - (num/den);
+                        row.push(Math.max(-2, Math.min(3, val)));
+                    }
+                }
+                z_data.push(row);
+            }
+
+            const trace = {
+                z: z_data,
+                x: x_data,
+                y: y_data,
+                type: 'surface',
+                colorscale: 'Portland',
+                showscale: false,
+                contours: {
+                    z: { show: true, usecolormap: true, highlightcolor: "#ffffff", project: { z: true } }
+                }
+            };
+
+            const layout = {
+                autosize: true,
+                margin: {t: 10, b: 10, l: 10, r: 10},
+                scene: {
+                    xaxis: {title: 'Eje X', gridcolor: '#e2e8f0', zerolinecolor: '#94a3b8'},
+                    yaxis: {title: 'Eje Y', gridcolor: '#e2e8f0', zerolinecolor: '#94a3b8'},
+                    zaxis: {title: 'f(X,Y)', gridcolor: '#e2e8f0', zerolinecolor: '#94a3b8', range: [-1, 2]},
+                    camera: { eye: {x: 1.5, y: -1.5, z: 1.2} }
+                },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)'
+            };
+
+            const config = {
+                displayModeBar: false,
+                responsive: true
+            };
+
+            Plotly.newPlot('plotly-container', [trace], layout, config);
+        }
+    </script>
+</body>
+</html>
