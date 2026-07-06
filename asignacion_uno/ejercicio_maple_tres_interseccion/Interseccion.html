@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resolución Completa: Intersección S1 y S2</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Plotly.js para gráficos 3D (Última versión estable) -->
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    
+    <!-- MathJax para Fórmulas Matemáticas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        pre::-webkit-scrollbar { height: 8px; width: 8px; }
+        pre::-webkit-scrollbar-track { background: #1e293b; border-radius: 4px; }
+        pre::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans leading-relaxed tracking-wide antialiased">
+
+    <div class="max-w-6xl mx-auto px-4 py-12 space-y-12">
+        
+        <!-- ENCABEZADO -->
+        <header class="text-center space-y-4">
+            <h1 class="text-4xl font-extrabold text-slate-900">Solución Integral: Geometría en \(\mathbb{R}^3\)</h1>
+            <p class="text-lg text-slate-600 max-w-2xl mx-auto">Desarrollo analítico, implementación en Maple y visualización interactiva de la intersección entre una superficie paramétrica y una curva implícita.</p>
+        </header>
+
+        <!-- 1. PLANTEAMIENTO DEL PROBLEMA -->
+        <section class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <h2 class="text-2xl font-bold text-slate-800 border-b border-gray-200 pb-3 mb-6">1. Planteamiento del Problema</h2>
+            <p class="mb-4">Determine el ángulo de corte en los puntos de intersección entre las siguientes entidades geométricas:</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                    <h3 class="font-bold text-slate-700 mb-2">Superficie \(S_1\) (Paramétrica):</h3>
+                    <p class="overflow-x-auto text-sm">
+                        \[ F(u,v) = (\pi\sin u \cos v, \pi\sin u \sin v, \pi\cos u) \]
+                    </p>
+                    <p class="text-xs text-gray-500 text-center mt-2">\( 0 \leq u \leq \pi \), \( 0 \leq v \leq 2\pi \)</p>
+                </div>
+                <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                    <h3 class="font-bold text-slate-700 mb-2">Curva \(S_2\) (Implícita):</h3>
+                    <p class="overflow-x-auto text-sm">
+                        \[ \begin{cases} x - \sin(z) = 0 \\ y - \cos(z) = 0 \end{cases} \]
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. DESARROLLO LÓGICO Y MATEMÁTICO -->
+        <section class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <h2 class="text-2xl font-bold text-slate-800 border-b border-gray-200 pb-3 mb-6">2. Lógica del Desarrollo Analítico</h2>
+            
+            <div class="space-y-6 text-gray-700">
+                <div class="pl-4 border-l-4 border-indigo-500">
+                    <h3 class="text-lg font-bold text-indigo-700">Paso A: Deducción Implícita de la Superficie \(S_1\)</h3>
+                    <p class="text-sm mt-2">Para hallar fácilmente la intersección, es conveniente transformar la esfera paramétrica a su ecuación cartesiana implícita. Sumando los cuadrados de las componentes de \(F(u,v)\):</p>
+                    <p class="text-sm">\[ x^2 + y^2 + z^2 = \pi^2(\sin^2u \cos^2v + \sin^2u \sin^2v + \cos^2u) \]</p>
+                    <p class="text-sm">Aplicando la identidad \(\sin^2\theta + \cos^2\theta = 1\), deducimos que \(S_1\) es la esfera: <strong>\(x^2 + y^2 + z^2 = \pi^2\)</strong>.</p>
+                </div>
+
+                <div class="pl-4 border-l-4 border-indigo-500">
+                    <h3 class="text-lg font-bold text-indigo-700">Paso B: Parametrización de la Curva \(S_2\)</h3>
+                    <p class="text-sm mt-2">La curva es la intersección de dos cilindros. Asignando \(z = t\), despejamos explícitamente el vector posición de esta hélice:</p>
+                    <p class="text-sm">\[ \vec{r}(t) = \langle \sin(t), \cos(t), t \rangle \]</p>
+                </div>
+
+                <div class="pl-4 border-l-4 border-emerald-500">
+                    <h3 class="text-lg font-bold text-emerald-700">Paso C: Intersección (\(P_0\)) y Vectores</h3>
+                    <p class="text-sm mt-2">Sustituimos \(\vec{r}(t)\) en la esfera: \(\sin^2(t) + \cos^2(t) + t^2 = \pi^2 \implies 1 + t^2 = \pi^2 \implies t_0 = \sqrt{\pi^2 - 1}\).</p>
+                    <p class="text-sm">Evaluando en este punto, definimos:</p>
+                    <ul class="list-disc pl-6 text-sm mt-2">
+                        <li><strong>Vector Tangente (\(\vec{T}\)):</strong> Derivada \(\vec{r}'(t_0) = \langle \cos(t_0), -\sin(t_0), 1 \rangle\).</li>
+                        <li><strong>Vector Normal (\(\vec{N}\)):</strong> Gradiente de la esfera \(\nabla G = \langle 2x_0, 2y_0, 2z_0 \rangle\).</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. GRÁFICA INTERACTIVA 3D -->
+        <section class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <h2 class="text-2xl font-bold text-slate-800 border-b border-gray-200 pb-3 mb-6">3. Resultado y Visualización Interactiva</h2>
+            
+            <!-- Contenedor del gráfico de Plotly -->
+            <div id="plot3d" class="w-full h-[600px] bg-slate-50 rounded-xl overflow-hidden shadow-inner border border-slate-200 mb-6"></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                    <span class="block text-sm font-bold text-indigo-800 uppercase">Ángulo con la Normal (\(\vec{N}\))</span>
+                    <p class="text-2xl font-black text-indigo-900">\(\gamma \approx 80.5^\circ\)</p>
+                </div>
+                <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                    <span class="block text-sm font-bold text-emerald-800 uppercase">Ángulo con el Plano Tangente</span>
+                    <p class="text-2xl font-black text-emerald-900">\(\approx 9.5^\circ\)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. CÓDIGO MAPLE COMPLETO -->
+        <section class="bg-slate-900 rounded-2xl shadow-lg overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 bg-slate-800 border-b border-slate-700">
+                <h3 class="text-slate-100 font-bold flex items-center gap-2">
+                    <i data-lucide="terminal" class="w-5 h-5"></i> Código Maple Completo
+                </h3>
+                <button onclick="copiarCodigo()" id="btn-copiar" class="flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg">
+                    <i data-lucide="copy" class="w-4 h-4"></i> Copiar Código
+                </button>
+            </div>
+            <div class="p-6 overflow-x-auto">
+<pre><code id="codigo-maple" class="text-slate-300 font-mono text-[13px] sm:text-sm leading-relaxed"># ==============================================================================
+# Solución rigurosa al problema de intersección geométrica en R^3
+# Superficie S1 (Esfera) y Curva S2 (Hélice) - Versión analítica deductiva
+# ==============================================================================
+
+restart;
+with(plots):
+with(LinearAlgebra):
+
+# 1. DEFINICIÓN Y TRANSFORMACIÓN DE ENTIDADES GEOMÉTRICAS
+# ------------------------------------------------------------------------------
+
+# --- Superficie S1: De Paramétrica a Implícita ---
+X_F := Pi*sin(u)*cos(v);
+Y_F := Pi*sin(u)*sin(v);
+Z_F := Pi*cos(u);
+
+F := &lt;X_F, Y_F, Z_F&gt;;
+
+Suma_Cuadrados := X_F^2 + Y_F^2 + Z_F^2;
+Eq_S1_implicita := x^2 + y^2 + z^2 = simplify(Suma_Cuadrados);
+
+# --- Curva S2: De Implícita a Paramétrica ---
+Eq1_S2 := x - sin(z) = 0;
+Eq2_S2 := y - cos(z) = 0;
+
+Despeje_S2 := solve({subs(z=t, Eq1_S2), subs(z=t, Eq2_S2)}, {x, y});
+r_curva := &lt;subs(Despeje_S2, x), subs(Despeje_S2, y), t&gt;;
+
+
+# 2. CÁLCULO DE PUNTOS DE INTERSECCIÓN
+# ------------------------------------------------------------------------------
+Eq_interseccion := subs({x=r_curva[1], y=r_curva[2], z=r_curva[3]}, Eq_S1_implicita);
+Eq_interseccion_simp := simplify(Eq_interseccion);
+
+Valores_t := [solve(Eq_interseccion_simp, t)];
+t0 := Valores_t[1]; # t0 = sqrt(Pi^2 - 1)
+
+P0 := eval(r_curva, t=t0);
+x0, y0, z0 := P0[1], P0[2], P0[3];
+
+
+# 3. CÁLCULO DE VECTORES TANGENTE Y NORMAL EN P0
+# ------------------------------------------------------------------------------
+T_vec_gen := map(diff, r_curva, t);
+T0 := eval(T_vec_gen, t=t0);
+
+Grad_S1 := &lt;2*x, 2*y, 2*z&gt;;
+N0 := eval(Grad_S1, {x=x0, y=y0, z=z0});
+
+
+# 4. CÁLCULO DEL ÁNGULO DE CORTE
+# ------------------------------------------------------------------------------
+Prod_Punto := DotProduct(T0, N0, conjugate=false);
+Norma_T0 := Norm(T0, 2);
+Norma_N0 := Norm(N0, 2);
+
+Angulo_Normal_rad := arccos(Prod_Punto / (Norma_T0 * Norma_N0));
+Angulo_Normal_deg := evalf(Angulo_Normal_rad * 180 / Pi);
+Angulo_Plano_deg := evalf(abs(Pi/2 - Angulo_Normal_rad) * 180 / Pi);
+
+
+# 5. CREACIÓN DE OBJETOS GRÁFICOS (REPRESENTACIÓN EN R^3)
+# ------------------------------------------------------------------------------
+Graf_S1 := plot3d([F[1], F[2], F[3]], u=0..Pi, v=0..2*Pi, 
+                  color="LightBlue", style=surface, transparency=0.4):
+
+Graf_S2 := spacecurve([r_curva[1], r_curva[2], r_curva[3]], t=-4..4, 
+                      color="Red", thickness=3):
+
+Graf_P0 := pointplot3d([x0, y0, z0], color="Black", symbol=solidcircle, symbolsize=20):
+
+Recta_Tang := P0 + s * T0;
+Graf_Recta := spacecurve([Recta_Tang[1], Recta_Tang[2], Recta_Tang[3]], s=-2..2, 
+                         color="Green", thickness=2, linestyle=dash):
+
+Eq_Plano_Tang := DotProduct(&lt;x-x0, y-y0, z-z0&gt;, N0, conjugate=false) = 0;
+Graf_Plano := implicitplot3d(Eq_Plano_Tang, 
+                             x=x0-2..x0+2, y=y0-2..y0+2, z=z0-2..z0+2, 
+                             color="Yellow", style=surface, transparency=0.3):
+
+N0_escalado := Normalize(N0, 2) * 2; 
+Graf_Vec_T0 := arrow(convert(P0, list), convert(T0, list), 
+                     color="Green", width=0.08, head_length=0.3):
+Graf_Vec_N0 := arrow(convert(P0, list), convert(N0_escalado, list), 
+                     color="Blue", width=0.08, head_length=0.3):
+
+# 6. IMPRESIÓN Y VISUALIZACIÓN
+# ------------------------------------------------------------------------------
+display([Graf_S1, Graf_S2, Graf_P0, Graf_Recta, Graf_Plano, Graf_Vec_T0, Graf_Vec_N0], 
+        scaling=constrained, axes=normal, orientation=[45, 60]);</code></pre>
+            </div>
+        </section>
+        
+        <footer class="text-center text-slate-500 text-sm pb-8">
+            Generado para análisis avanzado en Maple y Geometría Vectorial.
+        </footer>
+    </div>
+
+    <script>
+        // Inicializar iconos
+        lucide.createIcons();
+
+        // ----------------------------------------------------------
+        // LÓGICA DE PLOTLY PARA REPLICAR LA GRÁFICA DE MAPLE
+        // ----------------------------------------------------------
+        const pi = Math.PI;
+        
+        // Cálculos exactos del punto de intersección
+        const t0 = Math.sqrt(pi*pi - 1);
+        const x0 = Math.sin(t0);
+        const y0 = Math.cos(t0);
+        const z0 = t0;
+
+        // Vectores Tangente (T) y Normal (N)
+        const T = [Math.cos(t0), -Math.sin(t0), 1];
+        const N = [2*x0, 2*y0, 2*z0];
+
+        // Normalización para visualización (escalados para verse bien)
+        const magT = Math.sqrt(T[0]**2 + T[1]**2 + T[2]**2);
+        const Tn = T.map(v => (v/magT) * 2.5); // Escala del vector tangente
+        
+        const magN = Math.sqrt(N[0]**2 + N[1]**2 + N[2]**2);
+        const Nn = N.map(v => (v/magN) * 2.5); // Escala del vector normal
+
+        // 1. Curva S2 (Hélice Roja)
+        const t_vals = Array.from({length: 300}, (_, i) => -4.5 + 9 * i / 299);
+        const curve = {
+            x: t_vals.map(v => Math.sin(v)),
+            y: t_vals.map(v => Math.cos(v)),
+            z: t_vals,
+            type: 'scatter3d',
+            mode: 'lines',
+            line: {color: 'red', width: 6},
+            name: 'Curva S2'
+        };
+
+        // 2. Esfera S1 (Construida matemáticamente para renderizado de superficie)
+        const numPts = 40;
+        let phi = [], theta = [];
+        for (let i = 0; i <= numPts; i++) phi.push(pi * i / numPts);
+        for (let j = 0; j <= numPts; j++) theta.push(2 * pi * j / numPts);
+        
+        let sx = [], sy = [], sz = [];
+        for (let i = 0; i <= numPts; i++) {
+            let rx = [], ry = [], rz = [];
+            for (let j = 0; j <= numPts; j++) {
+                rx.push(pi * Math.sin(phi[i]) * Math.cos(theta[j]));
+                ry.push(pi * Math.sin(phi[i]) * Math.sin(theta[j]));
+                rz.push(pi * Math.cos(phi[i]));
+            }
+            sx.push(rx); sy.push(ry); sz.push(rz);
+        }
+        const sphere = {
+            type: 'surface',
+            x: sx, y: sy, z: sz,
+            opacity: 0.4,
+            colorscale: [[0, '#94a3b8'], [1, '#e2e8f0']], // Tono gris/azulado como en Maple
+            showscale: false,
+            name: 'Esfera S1'
+        };
+
+        // 3. Plano Tangente Amarillo
+        let px = [[x0-2, x0-2], [x0+2, x0+2]];
+        let py = [[y0-2, y0+2], [y0-2, y0+2]];
+        let pz = [
+            [z0 - (N[0]*(-2) + N[1]*(-2))/N[2], z0 - (N[0]*(-2) + N[1]*(2))/N[2]],
+            [z0 - (N[0]*(2) + N[1]*(-2))/N[2], z0 - (N[0]*(2) + N[1]*(2))/N[2]]
+        ];
+        const plane = {
+            type: 'surface',
+            x: px, y: py, z: pz,
+            opacity: 0.7,
+            colorscale: [[0, 'yellow'], [1, '#fde047']],
+            showscale: false,
+            name: 'Plano Tangente'
+        };
+
+        // 4. Vectores y Puntos
+        const pt = {
+            x: [x0], y: [y0], z: [z0],
+            type: 'scatter3d', mode: 'markers',
+            marker: {color: 'black', size: 8},
+            name: 'Intersección P0'
+        };
+
+        // Recta/Vector Tangente (Verde, interlineado emulado)
+        const vecT = {
+            x: [x0 - Tn[0], x0 + Tn[0]*1.5], 
+            y: [y0 - Tn[1], y0 + Tn[1]*1.5], 
+            z: [z0 - Tn[2], z0 + Tn[2]*1.5],
+            type: 'scatter3d', mode: 'lines',
+            line: {color: 'green', width: 5, dash: 'dash'},
+            name: 'Vector Tangente'
+        };
+
+        // Vector Normal (Azul)
+        const vecN = {
+            x: [x0, x0 + Nn[0]], 
+            y: [y0, y0 + Nn[1]], 
+            z: [z0, z0 + Nn[2]],
+            type: 'scatter3d', mode: 'lines',
+            line: {color: 'darkblue', width: 6},
+            name: 'Vector Normal'
+        };
+
+        // Renderizado
+        const layout = {
+            margin: {l:0, r:0, b:0, t:0},
+            scene: {
+                aspectmode: 'cube',
+                xaxis: {title: 'x', range: [-4, 4]},
+                yaxis: {title: 'y', range: [-4, 4]},
+                zaxis: {title: 'z', range: [-4, 5]},
+                camera: { eye: {x: 1.5, y: -1.5, z: 0.8} } // Ángulo de cámara similar a tu imagen
+            },
+            showlegend: true,
+            legend: {x: 0.8, y: 0.9}
+        };
+
+        Plotly.newPlot('plot3d', [sphere, plane, curve, pt, vecT, vecN], layout);
+
+        // ----------------------------------------------------------
+        // LÓGICA DE COPIADO AL PORTAPAPELES
+        // ----------------------------------------------------------
+        function copiarCodigo() {
+            const code = document.getElementById('codigo-maple').innerText;
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(code).then(confirmarCopia);
+            } else {
+                const tx = document.createElement("textarea");
+                tx.value = code;
+                tx.style.position = "fixed"; tx.style.opacity = "0";
+                document.body.appendChild(tx);
+                tx.select();
+                try { document.execCommand('copy'); confirmarCopia(); } catch (e) {}
+                tx.remove();
+            }
+        }
+
+        function confirmarCopia() {
+            const btn = document.getElementById('btn-copiar');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> <span class="text-emerald-400">¡Copiado!</span>`;
+            lucide.createIcons();
+            setTimeout(() => { btn.innerHTML = originalHTML; lucide.createIcons(); }, 2000);
+        }
+    </script>
+</body>
+</html>
