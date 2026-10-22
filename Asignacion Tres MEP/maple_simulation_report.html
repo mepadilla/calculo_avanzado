@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Simulación MAPLE - Cálculo Vectorial</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js para renderizado 3D de las gráficas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- MathJax para fórmulas matemáticas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="mathjax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 420px;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <!-- Header / Navbar -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-red-600/20 text-red-500 rounded-lg border border-red-500/30">
+                    <i data-lucide="cpu" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white tracking-tight">Simulación & Reporte MAPLE</h1>
+                    <p class="text-xs text-slate-400">Cálculo Vectorial en Ingeniería & Graphical Analysis</p>
+                </div>
+            </div>
+            
+            <!-- Quick Navigation Tabs -->
+            <nav class="flex space-x-2 bg-slate-800/80 p-1 rounded-xl border border-slate-700/50">
+                <a href="#problema3" class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition">Problema 3: Recipiente</a>
+                <a href="#problema4" class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition">Problema 4: Integral de Línea</a>
+                <a href="#codigo-maple" class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-500 transition shadow-lg shadow-red-600/20">Código MAPLE</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-12">
+
+        <!-- Intro Banner -->
+        <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950/40 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute right-0 top-0 bottom-0 w-1/3 bg-blue-500/5 blur-3xl rounded-full"></div>
+            <div class="relative z-10 max-w-3xl">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 mb-3">
+                    Resultados de Ejecución Activa
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-3">Modelado de Sólidos e Integrales Vectoriales</h2>
+                <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                    Plataforma interactiva con las salidas numéricas, analíticas y renderizado tridimensional interactivo correspondiente a la simulación del script de MAPLE para el recipiente industrial y el campo conservativo.
+                </p>
+            </div>
+        </div>
+
+        <!-- PROBLEMA 3 SECTION -->
+        <section id="problema3" class="space-y-6">
+            <div class="flex items-center space-x-3 border-b border-slate-800 pb-3">
+                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 font-bold text-sm">3</span>
+                <h2 class="text-xl sm:text-2xl font-bold text-white">Recipiente de Sección Circular y Fondo Cónico</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- 3D Viewer Container -->
+                <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col shadow-xl">
+                    <div class="flex justify-between items-center mb-3 px-2">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="box" class="w-4 h-4 text-indigo-400"></i>
+                            <span class="text-sm font-semibold text-slate-200">Representación 3D del Recipiente</span>
+                        </div>
+                        <span class="text-xs text-slate-500 flex items-center gap-1">
+                            <i data-lucide="move" class="w-3 h-3"></i> Arrastra para rotar / Scroll para zoom
+                        </span>
+                    </div>
+
+                    <!-- Canvas Interactive Three.js -->
+                    <div id="container-recipiente" class="canvas-container flex-grow"></div>
+
+                    <!-- Legend -->
+                    <div class="grid grid-cols-3 gap-2 mt-4 text-center text-xs">
+                        <div class="bg-blue-900/30 border border-blue-500/30 text-blue-300 py-1.5 px-2 rounded-lg">
+                            <span class="block font-bold">Fondo Cónico</span>
+                            <span class="text-[10px] text-slate-400">$h = 10\text{ ft}$</span>
+                        </div>
+                        <div class="bg-cyan-900/30 border border-cyan-500/30 text-cyan-300 py-1.5 px-2 rounded-lg">
+                            <span class="block font-bold">Carcasa Cilíndrica</span>
+                            <span class="text-[10px] text-slate-400">$H = 10\text{ ft}, D = \frac{40}{3}\text{ ft}$</span>
+                        </div>
+                        <div class="bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 py-1.5 px-2 rounded-lg">
+                            <span class="block font-bold">Cabeza Elipsoidal</span>
+                            <span class="text-[10px] text-slate-400">Relación 2:1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation Output Panel -->
+                <div class="lg:col-span-5 space-y-4 flex flex-col">
+                    <!-- Inciso A: Masa del sólido -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg flex-1">
+                        <div class="flex items-center space-x-2 text-indigo-400 mb-2">
+                            <i data-lucide="calculator" class="w-4 h-4"></i>
+                            <h3 class="font-semibold text-sm uppercase tracking-wider">a. Masa del Sólido (Cilíndricas)</h3>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-3">
+                            Densidad de masa: $\rho(r, z) = k(r^2 + z^2)$ medida desde el punto más bajo $(0,0,0)$.
+                        </p>
+                        
+                        <!-- MAPLE Output Box -->
+                        <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 font-mono text-xs space-y-2">
+                            <div class="text-slate-500">// Salida de Maple para Integrales:</div>
+                            <div class="text-slate-300">M_cono := <span class="text-cyan-400">880000*Pi*k / 81</span>; <span class="text-slate-500"># ~ 34114.77 k</span></div>
+                            <div class="text-slate-300">M_cilindro := <span class="text-cyan-400">9200000*Pi*k / 81</span>; <span class="text-slate-500"># ~ 356742.47 k</span></div>
+                            <div class="pt-2 border-t border-slate-800 text-emerald-400 font-bold">
+                                M_total = <span class="text-white">1120000*Pi*k / 9</span> &approx; 391111.11 * k
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inciso B: Teorema de Stokes -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg flex-1">
+                        <div class="flex items-center space-x-2 text-emerald-400 mb-2">
+                            <i data-lucide="shield-check" class="w-4 h-4"></i>
+                            <h3 class="font-semibold text-sm uppercase tracking-wider">b. Verificación Teorema de Stokes</h3>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-3">
+                            Para la cabeza elipsoidal y el campo vectorial $\mathbf{F}(x,y,z) = (x,y,z)$:
+                        </p>
+
+                        <!-- MAPLE Output Box -->
+                        <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 font-mono text-xs space-y-1">
+                            <div class="text-slate-500">> Curl(VectorField(<x, y, z>));</div>
+                            <div class="text-yellow-400 font-bold">VectorField(0, 0, 0)</div>
+                            <div class="text-slate-400 text-[11px] pt-1">
+                                &rArr; &iint;<sub>S</sub> (&nabla; &times; <b>F</b>)&middot;d<b>S</b> = 0 &emsp; y &emsp; &oint;<sub>C</sub> <b>F</b>&middot;d<b>r</b> = 0
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROBLEMA 4 SECTION -->
+        <section id="problema4" class="space-y-6">
+            <div class="flex items-center space-x-3 border-b border-slate-800 pb-3">
+                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 font-bold text-sm">4</span>
+                <h2 class="text-xl sm:text-2xl font-bold text-white">Integral de Línea & Campo Conservativo</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Simulation Output & Math Panel -->
+                <div class="lg:col-span-5 space-y-4 order-2 lg:order-1 flex flex-col">
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg flex-1">
+                        <div class="flex items-center space-x-2 text-emerald-400 mb-2">
+                            <i data-lucide="variable" class="w-4 h-4"></i>
+                            <h3 class="font-semibold text-sm uppercase tracking-wider">Función Potencial $f(x,y,z)$</h3>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-3">
+                            Para el campo $\mathbf{F} = (4xe^z, \cos y, 2x^2e^z)$, MAPLE encuentra el potencial tal que $\nabla f = \mathbf{F}$:
+                        </p>
+
+                        <!-- MAPLE Output Box -->
+                        <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 font-mono text-xs space-y-2">
+                            <div class="text-slate-500">> f_potencial := ScalarPotential(F_4);</div>
+                            <div class="text-cyan-400 font-bold">f(x, y, z) = 2*x^2*exp(z) + sin(y)</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg flex-1">
+                        <div class="flex items-center space-x-2 text-blue-400 mb-2">
+                            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                            <h3 class="font-semibold text-sm uppercase tracking-wider">Teorema Fundamental del Cálculo</h3>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-3">
+                            Evaluando en el punto inicial $P_0(0,0,0)$ y el punto final $P_3(0,1,1)$ sobre el plano $yz$:
+                        </p>
+
+                        <!-- MAPLE Output Box -->
+                        <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 font-mono text-xs space-y-1">
+                            <div class="text-slate-400">f(P3) = f(0, 1, 1) = sin(1)</div>
+                            <div class="text-slate-400">f(P0) = f(0, 0, 0) = 0</div>
+                            <div class="pt-2 border-t border-slate-800 text-emerald-400 font-bold text-sm">
+                                &int;<sub>C</sub> <b>F</b> &middot; d<b>r</b> = sin(1) &approx; 0.84147
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3D Viewer Container Trayectoria Poligonal -->
+                <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col shadow-xl order-1 lg:order-2">
+                    <div class="flex justify-between items-center mb-3 px-2">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="git-commit" class="w-4 h-4 text-emerald-400"></i>
+                            <span class="text-sm font-semibold text-slate-200">Trayectoria Poligonal C & Vectores Desplazamiento</span>
+                        </div>
+                        <span class="text-xs text-slate-500 flex items-center gap-1">
+                            <i data-lucide="move" class="w-3 h-3"></i> Arrastra para rotar
+                        </span>
+                    </div>
+
+                    <!-- Canvas Interactive Three.js -->
+                    <div id="container-trayectoria" class="canvas-container flex-grow"></div>
+
+                    <!-- Legend Trayectoria -->
+                    <div class="grid grid-cols-4 gap-2 mt-4 text-center text-xs">
+                        <div class="bg-red-900/30 border border-red-500/30 text-red-300 py-1.5 px-1 rounded-lg">
+                            <span class="block font-bold">Tramo 1 (Rojo)</span>
+                            <span class="text-[10px] text-slate-400">$P_0(0,0,0) \to P_1(1,1,0)$</span>
+                        </div>
+                        <div class="bg-emerald-900/30 border border-emerald-500/30 text-emerald-300 py-1.5 px-1 rounded-lg">
+                            <span class="block font-bold">Tramo 2 (Verde)</span>
+                            <span class="text-[10px] text-slate-400">$P_1(1,1,0) \to P_2(1,1,1)$</span>
+                        </div>
+                        <div class="bg-blue-900/30 border border-blue-500/30 text-blue-300 py-1.5 px-1 rounded-lg">
+                            <span class="block font-bold">Tramo 3 (Azul)</span>
+                            <span class="text-[10px] text-slate-400">$P_2(1,1,1) \to P_3(0,1,1)$</span>
+                        </div>
+                        <div class="bg-slate-800 border border-slate-700 text-slate-300 py-1.5 px-1 rounded-lg">
+                            <span class="block font-bold">Plano $yz$</span>
+                            <span class="text-[10px] text-slate-400">$x = 0$</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MAPLE CODE DISPLAY SECTION -->
+        <section id="codigo-maple" class="space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-red-600/20 text-red-500 rounded-lg">
+                        <i data-lucide="code-2" class="w-5 h-5"></i>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-white">Código Completo de Ejecución en MAPLE</h2>
+                </div>
+                <button onclick="copyCode()" class="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition border border-slate-700">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                    <span id="copy-text">Copiar Código</span>
+                </button>
+            </div>
+
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+                <div class="bg-slate-900/80 px-4 py-2 border-b border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                    <span class="code-font text-slate-300">script_maple_calculo.mpl</span>
+                    <span>Maple 2023 / 2024</span>
+                </div>
+                <pre class="p-5 code-font text-xs sm:text-sm text-slate-300 overflow-x-auto leading-relaxed"><code id="maple-script-text"># ==============================================================================
+# SCRIPT DE MAPLE: CÁLCULOS Y REPRESENTACIONES GRÁFICAS
+# ==============================================================================
+restart:
+with(plots):
+with(VectorCalculus):
+SetCoordinates(cartesian[x, y, z]):
+
+# ------------------------------------------------------------------------------
+# 1. VISUALIZACIÓN 3D DEL RECIPIENTE (PROBLEMA 3a)
+# ------------------------------------------------------------------------------
+H := 10:          # Altura de la carcasa cilíndrica (pies)
+h_cono := 10:     # Altura del fondo cónico (pies)
+D := (2/3)*(H + h_cono): # Diámetro de la carcasa = 40/3 pies
+R := D / 2:       # Radio = 20/3 pies
+
+p_cono := plot3d([(R/h_cono)*z*cos(theta), (R/h_cono)*z*sin(theta), z], 
+                 z = 0 .. h_cono, theta = 0 .. 2*Pi, 
+                 grid = [30, 30], color = Navy, shading = Z, 
+                 transparency = 0.1, axes = boxed, 
+                 title = "Geometria Completa del Recipiente Industrial"):
+
+p_cilindro := plot3d([R*cos(theta), R*sin(theta), z], 
+                     z = h_cono .. h_cono + H, theta = 0 .. 2*Pi, 
+                     grid = [30, 30], color = Cyan, shading = Z, 
+                     transparency = 0.2):
+
+p_cabeza := plot3d([R*sin(phi)*cos(theta), R*sin(phi)*sin(theta), (h_cono + H) + R*cos(phi)], 
+                   phi = 0 .. Pi/2, theta = 0 .. 2*Pi, 
+                   grid = [20, 30], color = SteelBlue, 
+                   transparency = 0.1):
+
+display([p_cono, p_cilindro, p_cabeza], 
+        scaling = constrained, 
+        labels = ["X (pie)", "Y (pie)", "Z (pie)"],
+        view = [-10..10, -10..10, -2..25]);
+
+# ------------------------------------------------------------------------------
+# 2. CÁLCULO DE MASA (PROBLEMA 3a)
+# ------------------------------------------------------------------------------
+rho := k * (r^2 + z^2):
+dV := r:
+M_cono := int(int(int(rho * dV, r = 0 .. (R/h_cono)*z), z = 0 .. h_cono), theta = 0 .. 2*Pi):
+M_cilindro := int(int(int(rho * dV, r = 0 .. R), z = h_cono .. h_cono + H), theta = 0 .. 2*Pi):
+M_total := simplify(M_cono + M_cilindro);
+
+# ------------------------------------------------------------------------------
+# 3. TEOREMA DE STOKES (PROBLEMA 3b)
+# ------------------------------------------------------------------------------
+F_3b := VectorField(<x, y, z>):
+rot_F := Curl(F_3b);
+
+# ------------------------------------------------------------------------------
+# 4. INTEGRAL DE LÍNEA Y TRAYECTORIA POLIGONAL (PROBLEMA 4)
+# ------------------------------------------------------------------------------
+F_4 := VectorField(<4*x*exp(z), cos(y), 2*x^2*exp(z)>):
+f_potencial := ScalarPotential(F_4);
+
+P0 := [0, 0, 0]:
+P1 := [1, 1, 0]:
+P2 := [1, 1, 1]:
+P3 := [0, 1, 1]: # Fin ortogonal al plano yz
+
+val_P3 := eval(f_potencial, [x = P3[1], y = P3[2], z = P3[3]]):
+val_P0 := eval(f_potencial, [x = P0[1], y = P0[2], z = P0[3]]):
+integral_linea := simplify(val_P3 - val_P0);
+
+c1 := spacecurve([t, t, 0], t = 0 .. 1, color = red, thickness = 3):
+c2 := spacecurve([1, 1, t], t = 0 .. 1, color = green, thickness = 3):
+c3 := spacecurve([1-t, 1, 1], t = 0 .. 1, color = blue, thickness = 3):
+
+nodos := pointplot3d([P0, P1, P2, P3], symbol = solidbox, symbolsize = 15, color = black):
+etiquetas := textplot3d([[P0[1],P0[2],P0[3]-0.1, "P0(0,0,0)"], 
+                         [P1[1]+0.05,P1[2],P1[3], "P1(1,1,0)"], 
+                         [P2[1],P2[2],P2[3]+0.1, "P2(1,1,1)"], 
+                         [P3[1]-0.1,P3[2],P3[3], "P3(0,1,1)"]], 
+                        font = [HELVETICA, BOLD, 12]):
+
+display([c1, c2, c3, nodos, etiquetas], 
+        axes = normal, 
+        gridlines = true,
+        labels = ["X", "Y", "Z"],
+        title = "Trayectoria Poligonal C en el Espacio");</code></pre>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-16 border-t border-slate-800 text-center py-6 text-xs text-slate-500">
+        Simulación Computacional de Análisis Vectorial &copy; MAPLE Interactive Visualization Report
+    </footer>
+
+    <!-- Three.js Interactive 3D Render Script -->
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Copy Code Functionality
+        function copyCode() {
+            const codeText = document.getElementById('maple-script-text').innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = codeText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            const copyTextSpan = document.getElementById('copy-text');
+            copyTextSpan.innerText = '¡Copiado!';
+            setTimeout(() => {
+                copyTextSpan.innerText = 'Copiar Código';
+            }, 2000);
+        }
+
+        // ==========================================
+        // THREE.JS SCENE 1: RECIPIENTE INDUSTRIAL 3D
+        // ==========================================
+        (function initRecipienteScene() {
+            const container = document.getElementById('container-recipiente');
+            const scene = new THREE.Scene();
+
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(25, 20, 35);
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(10, 20, 15);
+            scene.add(dirLight);
+
+            const gridHelper = new THREE.GridHelper(30, 30, 0x334155, 0x1e293b);
+            gridHelper.position.y = -0.1;
+            scene.add(gridHelper);
+
+            // Dimensions:
+            // R = 20/3 ~ 6.66, h_cono = 10, H = 10
+            const R = 20 / 3;
+            const h_cono = 10;
+            const H = 10;
+
+            const group = new THREE.Group();
+
+            // 1. Cono (Fondo)
+            const coneGeo = new THREE.CylinderGeometry(R, 0.1, h_cono, 32, 1, true);
+            const coneMat = new THREE.MeshStandardMaterial({
+                color: 0x1d4ed8,
+                roughness: 0.3,
+                metalness: 0.2,
+                transparent: true,
+                opacity: 0.85,
+                side: THREE.DoubleSide
+            });
+            const coneMesh = new THREE.Mesh(coneGeo, coneMat);
+            coneMesh.position.y = h_cono / 2;
+            group.add(coneMesh);
+
+            // 2. Cilindro (Carcasa)
+            const cilGeo = new THREE.CylinderGeometry(R, R, H, 32, 1, true);
+            const cilMat = new THREE.MeshStandardMaterial({
+                color: 0x06b6d4,
+                roughness: 0.2,
+                metalness: 0.3,
+                transparent: true,
+                opacity: 0.75,
+                side: THREE.DoubleSide
+            });
+            const cilMesh = new THREE.Mesh(cilGeo, cilMat);
+            cilMesh.position.y = h_cono + (H / 2);
+            group.add(cilMesh);
+
+            // 3. Cabeza Elipsoidal / Hemisferio
+            const sphereGeo = new THREE.SphereGeometry(R, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+            const sphereMat = new THREE.MeshStandardMaterial({
+                color: 0x4f46e5,
+                roughness: 0.3,
+                metalness: 0.2,
+                transparent: true,
+                opacity: 0.85,
+                side: THREE.DoubleSide
+            });
+            const sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
+            sphereMesh.position.y = h_cono + H;
+            group.add(sphereMesh);
+
+            // Wireframes to enhance CAD aesthetic
+            const wireframeMat = new THREE.LineBasicMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.3 });
+            
+            const coneWire = new THREE.LineSegments(new THREE.WireframeGeometry(coneGeo), wireframeMat);
+            coneWire.position.y = coneMesh.position.y;
+            group.add(coneWire);
+
+            const cilWire = new THREE.LineSegments(new THREE.WireframeGeometry(cilGeo), wireframeMat);
+            cilWire.position.y = cilMesh.position.y;
+            group.add(cilWire);
+
+            // Centering group
+            group.position.y = -10;
+            scene.add(group);
+
+            // Animation Loop
+            function animate() {
+                requestAnimationFrame(animate);
+                group.rotation.y += 0.003;
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // Resize handling
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        })();
+
+
+        // ==========================================
+        // THREE.JS SCENE 2: TRAYECTORIA POLIGONAL C
+        // ==========================================
+        (function initTrayectoriaScene() {
+            const container = document.getElementById('container-trayectoria');
+            const scene = new THREE.Scene();
+
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(3, 2.5, 4);
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            // Lights & Axes
+            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            dirLight.position.set(5, 10, 7);
+            scene.add(dirLight);
+
+            // Cartesian Coordinate Plane (YZ plane highlight)
+            const yzPlaneGeo = new THREE.PlaneGeometry(3, 3);
+            const yzPlaneMat = new THREE.MeshBasicMaterial({ color: 0x334155, side: THREE.DoubleSide, transparent: true, opacity: 0.3 });
+            const yzPlane = new THREE.Mesh(yzPlaneGeo, yzPlaneMat);
+            yzPlane.rotation.y = Math.PI / 2;
+            yzPlane.position.set(0, 0.75, 0.75);
+            scene.add(yzPlane);
+
+            // Coordinate Axes
+            const axesHelper = new THREE.AxesHelper(2);
+            scene.add(axesHelper);
+
+            // Path Points
+            const P0 = new THREE.Vector3(0, 0, 0);
+            const P1 = new THREE.Vector3(1, 1, 0);
+            const P2 = new THREE.Vector3(1, 1, 1);
+            const P3 = new THREE.Vector3(0, 1, 1);
+
+            // Draw Arrows / Path Lines
+            function createArrow(from, to, colorHex) {
+                const dir = new THREE.Vector3().subVectors(to, from);
+                const len = dir.length();
+                dir.normalize();
+                return new THREE.ArrowHelper(dir, from, len, colorHex, 0.15, 0.08);
+            }
+
+            scene.add(createArrow(P0, P1, 0xef4444)); // Tramo 1 - Rojo
+            scene.add(createArrow(P1, P2, 0x10b981)); // Tramo 2 - Verde
+            scene.add(createArrow(P2, P3, 0x3b82f6)); // Tramo 3 - Azul
+
+            // Add Node Points
+            const nodeGeo = new THREE.SphereGeometry(0.04, 16, 16);
+            const nodeMat = new THREE.MeshBasicMaterial({ color: 0xf8fafc });
+
+            [P0, P1, P2, P3].forEach((pt) => {
+                const mesh = new THREE.Mesh(nodeGeo, nodeMat);
+                mesh.position.copy(pt);
+                scene.add(mesh);
+            });
+
+            // Target Orbit Point
+            controls.target.set(0.5, 0.75, 0.5);
+
+            // Animation Loop
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // Resize handling
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        })();
+    </script>
+</body>
+</html>

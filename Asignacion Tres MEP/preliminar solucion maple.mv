@@ -1,0 +1,86 @@
+# ==============================================================================
+# RESOLUCIÓN DE PROBLEMAS 3 Y 4 EN MAPLE
+# ==============================================================================
+restart:
+with(plots):
+with(VectorCalculus):
+SetCoordinates(cartesian[x, y, z]):
+
+# ------------------------------------------------------------------------------
+# PROBLEMA 3a: Cálculo de Masa en Coordenadas Cilíndricas
+# ------------------------------------------------------------------------------
+# Parámetros del recipiente
+H := 10:          # Altura del cilindro (pies)
+h_cono := 10:     # Altura del cono (pies)
+D := (2/3)*(H + h_cono): # Diámetro de la carcasa
+R := D / 2:       # Radio del cilindro/cono (20/3 pies)
+
+# Densidad proporcional al cuadrado de la distancia al punto más bajo (0,0,0)
+# rho(r, z) = k*(r^2 + z^2)
+rho := k * (r^2 + z^2):
+dV := r: # Elemento de volumen diferencial en cilíndricas (r * dz * dr * dtheta)
+
+# 1. Masa de la sección cónica (z de 0 a h_cono, r de 0 a (R/h_cono)*z)
+M_cono := int(int(int(rho * dV, r = 0 .. (R/h_cono)*z), z = 0 .. h_cono), theta = 0 .. 2*Pi):
+
+# 2. Masa de la sección cilíndrica (z de h_cono a h_cono + H, r de 0 a R)
+M_cilindro := int(int(int(rho * dV, r = 0 .. R), z = h_cono .. h_cono + H), theta = 0 .. 2*Pi):
+
+# Masa total del sólido
+M_total := simplify(M_cono + M_cilindro);
+printf("Masa total del sólido (en términos de k): %a\n", M_total);
+
+# Visualización 3D del sólido
+cono_plot := plot3d([(R/h_cono)*z*cos(theta), (R/h_cono)*z*sin(theta), z], z = 0 .. h_cono, theta = 0 .. 2*Pi, color = blue):
+cil_plot  := plot3d([R*cos(theta), R*sin(theta), z], z = h_cono .. h_cono + H, theta = 0 .. 2*Pi, color = cyan):
+display([cono_plot, cil_plot], axes = boxed, title = "Geometría del Recipiente (Cono y Cilindro)");
+
+# ------------------------------------------------------------------------------
+# PROBLEMA 3b: Verificación del Teorema de Stokes
+# ------------------------------------------------------------------------------
+# Campo F = (x, y, z)
+F_3b := VectorField(<x, y, z>):
+
+# Rotacional de F
+rot_F := Curl(F_3b);
+
+# Como el rotacional es idénticamente nulo, la integral de superficie y 
+# la integral de línea en la frontera son ambas 0:
+printf("Rotacional del campo F(x,y,z) = (x,y,z): %a\n", rot_F);
+
+# ------------------------------------------------------------------------------
+# PROBLEMA 4: Integral de Línea y Función Potencial
+# ------------------------------------------------------------------------------
+# Campo vectorial F = (4*x*exp(z), cos(y), 2*x^2*exp(z))
+F_4 := VectorField(<4*x*exp(z), cos(y), 2*x^2*exp(z)>):
+
+# 1. Verificar si el campo es conservativo (Rotacional = 0)
+rot_F4 := Curl(F_4);
+
+# 2. Hallar la función potencial f(x, y, z) tal que grad(f) = F
+f_potencial := ScalarPotential(F_4);
+printf("Función potencial f(x,y,z): %a\n", f_potencial);
+
+# 3. Puntos de la trayectoria descrita en el problema 4:
+# P0: Origen (0,0,0)
+# P1: (1,1,0)
+# P2: (1,1,1)
+# P3: Desde (1,1,1) ortogonal al plano yz -> Punto final sobre el plano yz (x=0, y=1, z=1)
+P0 := [0, 0, 0]:
+P3 := [0, 1, 1]:
+
+# Aplicación del Teorema Fundamental del Cálculo para Integrales de Línea
+# Integral = f(P_final) - f(P_inicial)
+integral_linea := eval(f_potencial, [x = P3[1], y = P3[2], z = P3[3]]) - eval(f_potencial, [x = P0[1], y = P0[2], z = P0[3]]);
+printf("Valor de la integral de línea: %a\n", simplify(integral_linea));
+
+# 4. Graficar los vectores de desplazamiento de la trayectoria poligonal C
+with(plots):
+P1 := [1, 1, 0]:
+P2 := [1, 1, 1]:
+
+v1 := arrow(P0, P1, shape = cylinder, color = red):
+v2 := arrow(P1, P2, shape = cylinder, color = green):
+v3 := arrow(P2, P3, shape = cylinder, color = blue):
+
+display([v1, v2, v3], axes = normal, title = "Trayectoria Poligonal C y Vectores Desplazamiento");

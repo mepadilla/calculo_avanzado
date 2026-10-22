@@ -1,0 +1,741 @@
+#LyX 2.4 created this file. For more info see https://www.lyx.org/
+\lyxformat 620
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\usepackage[spanish]{babel}
+\usepackage{amsfonts}\usepackage{listings}
+\usepackage{xcolor}
+
+
+
+
+\lstset{
+    language=Maple,
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    keywordstyle=\bfseries,
+    commentstyle=\itshape,
+    stringstyle=,
+    frame=single,
+    showstringspaces=false,
+    backgroundcolor=\color{black!5}
+}
+
+\title{\textbf{Solución Asignacion Tres, Calculo Avanzado}}
+\author{Ing. Melvin E. Padilla}
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children no
+\language spanish
+\language_package default
+\inputencoding utf8
+\fontencoding default
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_roman_osf false
+\font_sans_osf false
+\font_typewriter_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\float_placement class
+\float_alignment class
+\paperfontsize 11
+\spacing single
+\use_hyperref false
+\papersize a4
+\use_geometry true
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 0
+\use_package esint 1
+\use_package mathdots 0
+\use_package mathtools 0
+\use_package mhchem 0
+\use_package stackrel 0
+\use_package stmaryrd 0
+\use_package undertilde 0
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_formatted_ref 0
+\use_minted 0
+\use_lineno 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style french
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tablestyle default
+\tracking_changes false
+\output_changes false
+\change_bars false
+\postpone_fragile_content true
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\docbook_table_output 0
+\docbook_mathml_prefix 1
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+maketitle
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introducción
+\end_layout
+
+\begin_layout Standard
+El presente documento detalla el desarrollo analítico y la implementación computacional en 
+\series bold
+MAPLE
+\series default
+ para la resolución de problemas de cálculo vectorial aplicados a la ingeniería.
+ Se abordan el modelado geométrico y cálculo de masa de un recipiente industrial,
+ la verificación del Teorema de Stokes y la evaluación de integrales de línea mediante campos vectoriales conservativos.
+\end_layout
+
+\begin_layout Section
+Problema 3:
+ Geometría y Análisis de Sólidos
+\end_layout
+
+\begin_layout Subsection
+Parámetros Geométricos del Recipiente
+\end_layout
+
+\begin_layout Standard
+Se consideran las siguientes dimensiones para el recipiente de sección circular con fondo cónico:
+ 
+\end_layout
+
+\begin_layout Itemize
+Altura de la parte cilíndrica:
+ 
+\begin_inset Formula $H=10\text{ pie}$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Itemize
+Altura de la parte cónica:
+ 
+\begin_inset Formula $h=10\text{ pie}$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Itemize
+Diámetro de la carcasa:
+ 
+\begin_inset Formula $D=\frac{2}{3}(H+h)=\frac{40}{3}\text{ pie}$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Itemize
+Radio de la sección circular:
+ 
+\begin_inset Formula $R=\frac{20}{3}\text{ pie}$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Subsection
+Inciso a:
+ Cálculo de la Masa
+\end_layout
+
+\begin_layout Standard
+La densidad de masa volumétrica en cada punto es proporcional al cuadrado de la distancia al punto más bajo del sólido:
+ 
+\begin_inset Formula 
+\[
+\rho(r,z)=k(r^{2}+z^{2})
+\]
+
+\end_inset
+
+Empleando coordenadas cilíndricas,
+ la masa total se obtiene integrando la densidad sobre el dominio correspondiente al fondo cónico y a la carcasa cilíndrica.
+\end_layout
+
+\begin_layout Subsection
+Inciso b:
+ Verificación del Teorema de Stokes
+\end_layout
+
+\begin_layout Standard
+Dado el campo vectorial 
+\begin_inset Formula $\mathbf{F}(x,y,z)=(x,y,z)$
+\end_inset
+
+,
+ su rotacional es idénticamente nulo (
+\begin_inset Formula $\nabla\times\mathbf{F}=\mathbf{0}$
+\end_inset
+
+),
+ lo que permite verificar de forma directa la igualdad establecida por el Teorema de Stokes sobre la superficie de la cabeza del recipiente.
+\end_layout
+
+\begin_layout Section
+Problema 4:
+ Integral de Línea y Función Potencial
+\end_layout
+
+\begin_layout Standard
+Se evalúa la integral de línea del campo vectorial:
+ 
+\begin_inset Formula 
+\[
+\mathbf{F}(x,y,z)=\left(4xe^{z},\cos(y),2x^{2}e^{z}\right)
+\]
+
+\end_inset
+
+A partir de la condición de campo conservativo,
+ se determina la función potencial 
+\begin_inset Formula $f(x,y,z)$
+\end_inset
+
+ y se aplica el Teorema Fundamental del Cálculo para trayectorias poligonales tridimensionales.
+\end_layout
+
+\begin_layout Section
+Script de MAPLE Implementado
+\end_layout
+
+\begin_layout Standard
+A continuación se muestra el código utilizado en MAPLE para automatizar el cálculo analítico y las representaciones gráficas espaciales:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+restart:
+\end_layout
+
+\begin_layout Plain Layout
+
+with(plots):
+\end_layout
+
+\begin_layout Plain Layout
+
+with(VectorCalculus):
+\end_layout
+
+\begin_layout Plain Layout
+
+SetCoordinates(cartesian[x,
+ y,
+ z]):
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+# 1.
+ VISUALIZACIÓN 3D DEL RECIPIENTE (PROBLEMA 3a)
+\end_layout
+
+\begin_layout Plain Layout
+
+H := 10:
+\end_layout
+
+\begin_layout Plain Layout
+
+h_cono := 10:
+\end_layout
+
+\begin_layout Plain Layout
+
+D := (2/3)*(H + h_cono):
+\end_layout
+
+\begin_layout Plain Layout
+
+R := D / 2:
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+p_cono := plot3d([(R/h_cono)*z*cos(theta),
+ (R/h_cono)*z*sin(theta),
+ z],
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+                 z = 0 ..
+ h_cono,
+ theta = 0 ..
+ 2*Pi,
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+                 grid = [30,
+ 30],
+ color = Navy,
+ shading = Z,
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+                 transparency = 0.1,
+ axes = boxed,
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+                 title = "Geometria Completa del Recipiente Industrial"):
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+p_cilindro := plot3d([R*cos(theta),
+ R*sin(theta),
+ z],
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+                     z = h_cono ..
+ h_cono + H,
+ theta = 0 ..
+ 2*Pi,
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+                     grid = [30,
+ 30],
+ color = Cyan,
+ shading = Z,
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+                     transparency = 0.2):
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+p_cabeza := plot3d([R*sin(phi)*cos(theta),
+ R*sin(phi)*sin(theta),
+ (h_cono + H) + R*cos(phi)],
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+                   phi = 0 ..
+ Pi/2,
+ theta = 0 ..
+ 2*Pi,
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+                   grid = [20,
+ 30],
+ color = SteelBlue,
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+                   transparency = 0.1):
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+display([p_cono,
+ p_cilindro,
+ p_cabeza],
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+        scaling = constrained,
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+        labels = ["X (pie)",
+ "Y (pie)",
+ "Z (pie)"],
+\end_layout
+
+\begin_layout Plain Layout
+
+        view = [-10..10,
+ -10..10,
+ -2..25]);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+# 2.
+ CÁLCULO DE MASA (PROBLEMA 3a)
+\end_layout
+
+\begin_layout Plain Layout
+
+rho := k * (r^2 + z^2):
+\end_layout
+
+\begin_layout Plain Layout
+
+dV := r:
+\end_layout
+
+\begin_layout Plain Layout
+
+M_cono := int(int(int(rho * dV,
+ r = 0 ..
+ (R/h_cono)*z),
+ z = 0 ..
+ h_cono),
+ theta = 0 ..
+ 2*Pi):
+\end_layout
+
+\begin_layout Plain Layout
+
+M_cilindro := int(int(int(rho * dV,
+ r = 0 ..
+ R),
+ z = h_cono ..
+ h_cono + H),
+ theta = 0 ..
+ 2*Pi):
+\end_layout
+
+\begin_layout Plain Layout
+
+M_total := simplify(M_cono + M_cilindro);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+# 3.
+ TEOREMA DE STOKES (PROBLEMA 3b)
+\end_layout
+
+\begin_layout Plain Layout
+
+F_3b := VectorField(<x,
+ y,
+ z>):
+\end_layout
+
+\begin_layout Plain Layout
+
+rot_F := Curl(F_3b);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+# 4.
+ INTEGRAL DE LÍNEA Y TRAYECTORIA POLIGONAL (PROBLEMA 4)
+\end_layout
+
+\begin_layout Plain Layout
+
+F_4 := VectorField(<4*x*exp(z),
+ cos(y),
+ 2*x^2*exp(z)>):
+\end_layout
+
+\begin_layout Plain Layout
+
+f_potencial := ScalarPotential(F_4);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+P0 := [0,
+ 0,
+ 0]:
+\end_layout
+
+\begin_layout Plain Layout
+
+P1 := [1,
+ 1,
+ 0]:
+\end_layout
+
+\begin_layout Plain Layout
+
+P2 := [1,
+ 1,
+ 1]:
+\end_layout
+
+\begin_layout Plain Layout
+
+P3 := [0,
+ 1,
+ 1]:
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+val_P3 := eval(f_potencial,
+ [x = P3[1],
+ y = P3[2],
+ z = P3[3]]):
+\end_layout
+
+\begin_layout Plain Layout
+
+val_P0 := eval(f_potencial,
+ [x = P0[1],
+ y = P0[2],
+ z = P0[3]]):
+\end_layout
+
+\begin_layout Plain Layout
+
+integral_linea := simplify(val_P3 - val_P0);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+c1 := spacecurve([t,
+ t,
+ 0],
+ t = 0 ..
+ 1,
+ color = red,
+ thickness = 3):
+\end_layout
+
+\begin_layout Plain Layout
+
+c2 := spacecurve([1,
+ 1,
+ t],
+ t = 0 ..
+ 1,
+ color = green,
+ thickness = 3):
+\end_layout
+
+\begin_layout Plain Layout
+
+c3 := spacecurve([1-t,
+ 1,
+ 1],
+ t = 0 ..
+ 1,
+ color = blue,
+ thickness = 3):
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+nodos := pointplot3d([P0,
+ P1,
+ P2,
+ P3],
+ symbol = solidbox,
+ symbolsize = 15,
+ color = black):
+\end_layout
+
+\begin_layout Plain Layout
+
+etiquetas := textplot3d([[P0[1],P0[2],P0[3]-0.1,
+ "P0(0,0,0)"],
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+                         [P1[1]+0.05,P1[2],P1[3],
+ "P1(1,1,0)"],
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+                         [P2[1],P2[2],P2[3]+0.1,
+ "P2(1,1,1)"],
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+                         [P3[1]-0.1,P3[2],P3[3],
+ "P3(0,1,1)"]],
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+                        font = [HELVETICA,
+ BOLD,
+ 12]):
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+display([c1,
+ c2,
+ c3,
+ nodos,
+ etiquetas],
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+        axes = normal,
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+        gridlines = true,
+\end_layout
+
+\begin_layout Plain Layout
+
+        labels = ["X",
+ "Y",
+ "Z"],
+\end_layout
+
+\begin_layout Plain Layout
+
+        title = "Trayectoria Poligonal C en el Espacio");
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

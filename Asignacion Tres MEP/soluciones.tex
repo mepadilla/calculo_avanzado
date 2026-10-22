@@ -1,0 +1,135 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\geometry{margin=2.5cm}
+
+\lstset{
+    language=Maple,
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{red},
+    frame=single,
+    showstringspaces=false,
+    backgroundcolor=\color{black!5}
+}
+
+\title{\textbf{Reporte Técnico: Resolución de Cálculo Vectorial con MAPLE}}
+\author{Ing. Melvin E. Padilla}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introducción}
+El presente documento detalla el desarrollo analítico y la implementación computacional en \textbf{MAPLE} para la resolución de problemas de cálculo vectorial aplicados a la ingeniería. Se abordan el modelado geométrico y cálculo de masa de un recipiente industrial, la verificación del Teorema de Stokes y la evaluación de integrales de línea mediante campos vectoriales conservativos.
+
+\section{Problema 3: Geometría y Análisis de Sólidos}
+\subsection{Parámetros Geométricos del Recipiente}
+Se consideran las siguientes dimensiones para el recipiente de sección circular con fondo cónico:
+\begin{itemize}
+    \item Altura de la parte cilíndrica: $H = 10\text{ pie}$
+    \item Altura de la parte cónica: $h = 10\text{ pie}$
+    \item Diámetro de la carcasa: $D = \frac{2}{3}(H + h) = \frac{40}{3}\text{ pie}$
+    \item Radio de la sección circular: $R = \frac{20}{3}\text{ pie}$
+\end{itemize}
+
+\subsection{Inciso a: Cálculo de la Masa}
+La densidad de masa volumétrica en cada punto es proporcional al cuadrado de la distancia al punto más bajo del sólido:
+$$\rho(r, z) = k(r^2 + z^2)$$
+Empleando coordenadas cilíndricas, la masa total se obtiene integrando la densidad sobre el dominio correspondiente al fondo cónico y a la carcasa cilíndrica.
+
+\subsection{Inciso b: Verificación del Teorema de Stokes}
+Dado el campo vectorial $\mathbf{F}(x,y,z) = (x,y,z)$, su rotacional es idénticamente nulo ($\nabla \times \mathbf{F} = \mathbf{0}$), lo que permite verificar de forma directa la igualdad establecida por el Teorema de Stokes sobre la superficie de la cabeza del recipiente.
+
+\section{Problema 4: Integral de Línea y Función Potencial}
+Se evalúa la integral de línea del campo vectorial:
+$$\mathbf{F}(x,y,z) = \left(4xe^z, \cos(y), 2x^2e^z\right)$$
+A partir de la condición de campo conservativo, se determina la función potencial $f(x,y,z)$ y se aplica el Teorema Fundamental del Cálculo para trayectorias poligonales tridimensionales.
+
+\section{Script de MAPLE Implementado}
+A continuación se muestra el código utilizado en MAPLE para automatizar el cálculo analítico y las representaciones gráficas espaciales:
+
+\begin{lstlisting}
+restart:
+with(plots):
+with(VectorCalculus):
+SetCoordinates(cartesian[x, y, z]):
+
+# 1. VISUALIZACIÓN 3D DEL RECIPIENTE (PROBLEMA 3a)
+H := 10:
+h_cono := 10:
+D := (2/3)*(H + h_cono):
+R := D / 2:
+
+p_cono := plot3d([(R/h_cono)*z*cos(theta), (R/h_cono)*z*sin(theta), z], 
+                 z = 0 .. h_cono, theta = 0 .. 2*Pi, 
+                 grid = [30, 30], color = Navy, shading = Z, 
+                 transparency = 0.1, axes = boxed, 
+                 title = "Geometria Completa del Recipiente Industrial"):
+
+p_cilindro := plot3d([R*cos(theta), R*sin(theta), z], 
+                     z = h_cono .. h_cono + H, theta = 0 .. 2*Pi, 
+                     grid = [30, 30], color = Cyan, shading = Z, 
+                     transparency = 0.2):
+
+p_cabeza := plot3d([R*sin(phi)*cos(theta), R*sin(phi)*sin(theta), (h_cono + H) + R*cos(phi)], 
+                   phi = 0 .. Pi/2, theta = 0 .. 2*Pi, 
+                   grid = [20, 30], color = SteelBlue, 
+                   transparency = 0.1):
+
+display([p_cono, p_cilindro, p_cabeza], 
+        scaling = constrained, 
+        labels = ["X (pie)", "Y (pie)", "Z (pie)"],
+        view = [-10..10, -10..10, -2..25]);
+
+# 2. CÁLCULO DE MASA (PROBLEMA 3a)
+rho := k * (r^2 + z^2):
+dV := r:
+M_cono := int(int(int(rho * dV, r = 0 .. (R/h_cono)*z), z = 0 .. h_cono), theta = 0 .. 2*Pi):
+M_cilindro := int(int(int(rho * dV, r = 0 .. R), z = h_cono .. h_cono + H), theta = 0 .. 2*Pi):
+M_total := simplify(M_cono + M_cilindro);
+
+# 3. TEOREMA DE STOKES (PROBLEMA 3b)
+F_3b := VectorField(<x, y, z>):
+rot_F := Curl(F_3b);
+
+# 4. INTEGRAL DE LÍNEA Y TRAYECTORIA POLIGONAL (PROBLEMA 4)
+F_4 := VectorField(<4*x*exp(z), cos(y), 2*x^2*exp(z)>):
+f_potencial := ScalarPotential(F_4);
+
+P0 := [0, 0, 0]:
+P1 := [1, 1, 0]:
+P2 := [1, 1, 1]:
+P3 := [0, 1, 1]:
+
+val_P3 := eval(f_potencial, [x = P3[1], y = P3[2], z = P3[3]]):
+val_P0 := eval(f_potencial, [x = P0[1], y = P0[2], z = P0[3]]):
+integral_linea := simplify(val_P3 - val_P0);
+
+c1 := spacecurve([t, t, 0], t = 0 .. 1, color = red, thickness = 3):
+c2 := spacecurve([1, 1, t], t = 0 .. 1, color = green, thickness = 3):
+c3 := spacecurve([1-t, 1, 1], t = 0 .. 1, color = blue, thickness = 3):
+
+nodos := pointplot3d([P0, P1, P2, P3], symbol = solidbox, symbolsize = 15, color = black):
+etiquetas := textplot3d([[P0[1],P0[2],P0[3]-0.1, "P0(0,0,0)"], 
+                         [P1[1]+0.05,P1[2],P1[3], "P1(1,1,0)"], 
+                         [P2[1],P2[2],P2[3]+0.1, "P2(1,1,1)"], 
+                         [P3[1]-0.1,P3[2],P3[3], "P3(0,1,1)"]], 
+                        font = [HELVETICA, BOLD, 12]):
+
+display([c1, c2, c3, nodos, etiquetas], 
+        axes = normal, 
+        gridlines = true,
+        labels = ["X", "Y", "Z"],
+        title = "Trayectoria Poligonal C en el Espacio");
+\end{lstlisting}
+
+\end{document}
